@@ -28,6 +28,124 @@ app.use(
     origin: "*",
   })
 );
+app.post("/md", async (req, res) => {
+  const bs1 = {
+    type: "SOLO",
+    map: "ERANGLE",
+    date: "01/01/2004",
+    time: "10:00 am",
+    w: 100,
+    r: 50,
+    k: 5,
+  };
+  const bs2 = {
+    type: "SOLO",
+    map: "ERANGLE",
+    date: "01/01/2004",
+    time: "11:00 am",
+    w: 100,
+    r: 50,
+    k: 5,
+  };
+  const bsd = {
+    type: "SQUAD",
+    map: "ERANGLE",
+    date: "01/01/2004",
+    time: "12:00 am",
+    w: 50,
+    r: 25,
+    k: 5,
+  };
+  const fs1 = {
+    type: "SOLO",
+    map: "BERMUDA",
+    date: "01/01/2004",
+    time: "10:00 am",
+    w: 120,
+    r: 60,
+    k: 10,
+  };
+  const fs2 = {
+    type: "SOLO",
+    map: "BERMUDA",
+    date: "01/01/2004",
+    time: "11:00 am",
+    w: 120,
+    r: 60,
+    k: 10,
+  };
+  const fsd = {
+    type: "SQUAD",
+    map: "BERMUDA",
+    date: "01/01/2004",
+    time: "12:00 am",
+    w: 50,
+    r: 25,
+    k: 10,
+  };
+  const bs1r = {
+    name: "BGMI",
+    type: "SOLO",
+    map: "ERANGLE",
+    date: "01/01/2003",
+    time: "10:00 am",
+    display: "flex",
+  };
+  const bs2r = {
+    name: "BGMI",
+    type: "SOLO",
+    map: "ERANGLE",
+    date: "01/01/2003",
+    time: "11:00 am",
+    display: "none",
+  };
+  const bsdr = {
+    name: "BGMI",
+    type: "SQUAD",
+    map: "ERANGLE",
+    date: "01/01/2003",
+    time: "12:00 am",
+    display: "none",
+  };
+  const fs1r = {
+    name: "FREE FIRE",
+    type: "SOLO",
+    map: "BERMUDA",
+    date: "01/01/2003",
+    time: "10:00 am",
+    display: "none",
+  };
+  const fs2r = {
+    name: "FREE FIRE",
+    type: "SOLO",
+    map: "BERMUDA",
+    date: "01/01/2003",
+    time: "11:00 am",
+    display: "none",
+  };
+  const fsdr = {
+    name: "FREE FIRE",
+    type: "SQUAD",
+    map: "BERMUDA",
+    date: "01/01/2003",
+    time: "12:00 am",
+    display: "flex",
+  };
+  res.json({
+    bs1: [bs1.type, bs1.map, bs1.date, bs1.time, bs1.w, bs1.r, bs1.k],
+    bs2: [bs2.type, bs2.map, bs2.date, bs2.time, bs2.w, bs2.r, bs2.k],
+    bsd: [bsd.type, bsd.map, bsd.date, bsd.time, bsd.w, bsd.r, bsd.k],
+    fs1: [fs1.type, fs1.map, fs1.date, fs1.time, fs1.w, fs1.r, fs1.k],
+    fs2: [fs2.type, fs2.map, fs2.date, fs2.time, fs2.w, fs2.r, fs2.k],
+    fsd: [fsd.type, fsd.map, fsd.date, fsd.time, fsd.w, fsd.r, fsd.k],
+    bs1r: [bs1r.name, bs1r.type, bs1r.map, bs1r.date, bs1r.time, bs1r.display],
+    bs2r: [bs2r.name, bs2r.type, bs2r.map, bs2r.date, bs2r.time, bs2r.display],
+    bsdr: [bsdr.name, bsdr.type, bsdr.map, bsdr.date, bsdr.time, bsdr.display],
+    fs1r: [fs1r.name, fs1r.type, fs1r.map, fs1r.date, fs1r.time, fs1r.display],
+    fs2r: [fs2r.name, fs2r.type, fs2r.map, fs2r.date, fs2r.time, fs2r.display],
+    fsdr: [fsdr.name, fsdr.type, fsdr.map, fsdr.date, fsdr.time, fsdr.display],
+  });
+});
 app.use(express.json());
 main().catch((err) => console.log(err));
 async function main() {
