@@ -690,4 +690,4 @@ app.post("/fsquad", async (req, res) => {
     }
   }
 });
-app.listen(4000, "0.0.0.0", () => console.log("server is on"));
+app.listen(4000, "0.0.0.0", () => console.log("server is on port 4000"));
