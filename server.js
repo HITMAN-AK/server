@@ -237,7 +237,7 @@ app.post(
       event = stripe.webhooks.constructEvent(
         payload,
         sig,
-        "whsec_cf88396723426460d41901c213f55d12d2cce5609fd413f61ce04fd244c34984"
+        "whsec_7cA1d6MZPpHvAx1E8EDlRGgSSylkGGzy"
       );
     } catch (err) {
       console.error("Webhook signature verification failed.", err);
