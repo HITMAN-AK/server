@@ -286,8 +286,8 @@ app.post("/payment", async (req, res) => {
       origin: "India",
     },
     mode: "payment",
-    success_url: "http://localhost:3000/deposit",
-    cancel_url: "http://localhost:3000/home",
+    success_url: "https://gaminghub.co.in/deposit",
+    cancel_url: "https://gaminghub.co.in/home",
   });
   res.json({ id: session.id });
 });
