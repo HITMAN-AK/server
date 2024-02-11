@@ -229,14 +229,13 @@ app.post("/wd", async (req, res) => {
 app.post("/webhook", (req, res) => {
   const { amount, order_id, paymentAmount, status, secretKey } = req.body;
   if (secretKey !== key) {
-      return res.status(401).send('Unauthorized');
-  }
-  else{
-    console.log('Webhook received:');
-    console.log('Amount:', amount);
-    console.log('Order ID:', order_id);
-    console.log('Payment Amount:', paymentAmount);
-    console.log('Status:', status);
+    return res.status(401).send("Unauthorized");
+  } else {
+    console.log("Webhook received:");
+    console.log("Amount:", amount);
+    console.log("Order ID:", order_id);
+    console.log("Payment Amount:", paymentAmount);
+    console.log("Status:", status);
   }
 });
 // async function handleSuccessfulPayment(amountPaid, username) {
@@ -270,6 +269,7 @@ app.post("/payment", async (req, res) => {
     const responseData = response.data;
 
     if (responseData.status === true) {
+      console.log(responseData.status);
       console.log(responseData.payment_url);
       res.json({ paymentUrl: responseData.payment_url, status: "sc" });
     } else {
