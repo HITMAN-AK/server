@@ -265,6 +265,7 @@ app.post("/payment", async (req, res) => {
     const responseData = response.data;
 
     if (responseData.status === true) {
+      console.log(responseData.payment_url);
       res.json({ paymentUrl: responseData.payment_url, status: "sc" });
     } else {
       res.status(400).send(responseData.msg);
