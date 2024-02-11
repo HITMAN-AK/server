@@ -3,9 +3,8 @@ const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const stripe = require("stripe")(
-  "sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed"
-);
+const key = "dbe021fb75451e68f7137a48f1b4208c";
+const apikey = "5774999352456";
 app.use("/webhook", express.raw({ type: "application/json" }));
 const User = require("./User");
 const Bsolo1 = require("./Bsolo1");
@@ -226,70 +225,53 @@ app.post("/wd", async (req, res) => {
     res.json({ status: "ib" });
   }
 });
-app.post(
-  "/webhook",
-  bodyParser.raw({ type: "application/json" }),
-  async (req, res) => {
-    const payload = req.body;
-    const sig = req.headers["stripe-signature"];
-    let event;
-    try {
-      event = stripe.webhooks.constructEvent(
-        payload,
-        sig,
-        "whsec_7cA1d6MZPpHvAx1E8EDlRGgSSylkGGzy"
-      );
-    } catch (err) {
-      console.error("Webhook signature verification failed.", err);
-      return res.sendStatus(400);
-    }
-    if (event.type === "checkout.session.completed") {
-      const session = event.data.object;
-      const amountPaid = session.amount_total / 100;
-      const username =
-        session.metadata && session.metadata.user
-          ? session.metadata.user
-          : null;
-      handleSuccessfulPayment(amountPaid, username);
-    }
-    res.sendStatus(200);
+app.post("/webhook", (req, res) => {
+  const { status, paymentAmount } = req.body;
+  if (status === "success") {
+    console.log(`Payment of ${paymentAmount} was successful`);
+  } else if (status === "failure") {
+    console.log(`Payment of ${paymentAmount} failed`);
   }
-);
-async function handleSuccessfulPayment(amountPaid, username) {
-  console.log("Amount paid:", amountPaid);
-  console.log("Product name:", username);
-  const balance = await User.where({ username: username }).select("amount");
-  let x = balance[0].amount;
-  x += amountPaid;
-  const amount = await User.where({ username: username }).select("amount");
-  await User.updateOne({ _id: amount }, { amount: x });
-}
+});
+// async function handleSuccessfulPayment(amountPaid, username) {
+//   console.log("Amount paid:", amountPaid);
+//   console.log("Product name:", username);
+//   const balance = await User.where({ username: username }).select("amount");
+//   let x = balance[0].amount;
+//   x += amountPaid;
+//   const amount = await User.where({ username: username }).select("amount");
+//   await User.updateOne({ _id: amount }, { amount: x });
+// }
 app.post("/payment", async (req, res) => {
   const amount = req.body.amount;
   const username = req.body.username;
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "inr",
-          product_data: {
-            name: username,
-          },
-          unit_amount: amount * 100,
-        },
-        quantity: 1,
-      },
-    ],
-    metadata: {
-      user: username,
-      origin: "India",
-    },
-    mode: "payment",
-    success_url: "https://gaminghub.co.in/deposit",
-    cancel_url: "https://gaminghub.co.in/home",
-  });
-  res.json({ id: session.id });
+  const email = req.body.email;
+  const x = Math.floor(Math.random() * 10000000000);
+  try {
+    const requestData = {
+      key: key,
+      order_id: x,
+      amount: amount,
+      purpose: username,
+      customer_email: email,
+      redirect_url: "http://localhost:3000/home",
+    };
+
+    const response = await axios.post(
+      "https://qropay.com/api/add_order.php",
+      requestData
+    );
+    const responseData = response.data;
+
+    if (responseData.status === true) {
+      res.json({ paymentUrl: responseData.payment_url, status: "sc" });
+    } else {
+      res.status(400).send(responseData.msg);
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 app.get("/bs1r", async (req, res) => {
   const bsolo1 = await Bsolo1r.find().sort({ position: 1 });
