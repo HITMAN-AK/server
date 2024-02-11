@@ -21,6 +21,7 @@ const Fsolo2r = require("./Fsolo2r");
 const Fsquadr = require("./Fsquadr");
 const Help = require("./Help");
 const Upi = require("./Upi");
+const axios = require("axios");
 app.use(express.static("public"));
 app.use(
   cors({
