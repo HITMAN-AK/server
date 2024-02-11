@@ -231,12 +231,13 @@ app.post("/webhook", (req, res) => {
   if (secretKey !== key) {
       return res.status(401).send('Unauthorized');
   }
-  console.log('Webhook received:');
-  console.log('Amount:', amount);
-  console.log('Order ID:', order_id);
-  console.log('Payment Amount:', paymentAmount);
-  console.log('Status:', status);
-
+  else{
+    console.log('Webhook received:');
+    console.log('Amount:', amount);
+    console.log('Order ID:', order_id);
+    console.log('Payment Amount:', paymentAmount);
+    console.log('Status:', status);
+  }
 });
 // async function handleSuccessfulPayment(amountPaid, username) {
 //   console.log("Amount paid:", amountPaid);
