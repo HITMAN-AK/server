@@ -228,11 +228,9 @@ app.post("/wd", async (req, res) => {
 });
 app.post("/webhook", (req, res) => {
   const { status, paymentAmount } = req.body;
-  if (status === "success") {
-    console.log(`Payment of ${paymentAmount} was successful`);
-  } else if (status === "failure") {
-    console.log(`Payment of ${paymentAmount} failed`);
-  }
+  console.log(status);
+  console.log(`Payment of ${paymentAmount} was successful`);
+  console.log(`Payment of ${paymentAmount} failed`);
 });
 // async function handleSuccessfulPayment(amountPaid, username) {
 //   console.log("Amount paid:", amountPaid);
@@ -250,7 +248,7 @@ app.post("/payment", async (req, res) => {
   const x = Math.floor(Math.random() * 10000000000);
   try {
     const requestData = {
-      key: key,
+      key: apikey,
       order_id: x,
       amount: amount,
       purpose: username,
