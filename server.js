@@ -2,9 +2,15 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const paypal = require("@paypal/checkout-server-sdk");
+const clientId =
+  "AfHXJQ0Zs4PI6KU-35e5HJho4CoA0EuPhe33MiBdM_Qc-Nv8dlTmRXhEOGhRo_2J32IUdIiVUgKShaim";
+const clientSecret =
+  "EIn37vh_jFRU6UHtnj2h5M4ck4tDwbrRn6mQNLYio6eGWZMmr5nFWXdCMHC4h7dAHifINxEf0rm-p4iL";
+const environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
+const client = new paypal.core.PayPalHttpClient(environment);
+app.use(bodyParser.json());
 const cors = require("cors");
-const key = "dbe021fb75451e68f7137a48f1b4208c";
-const apikey = "5774999352456";
 app.use("/webhook", express.raw({ type: "application/json" }));
 const User = require("./User");
 const Bsolo1 = require("./Bsolo1");
@@ -227,54 +233,39 @@ app.post("/wd", async (req, res) => {
   }
 });
 app.post("/webhook", (req, res) => {
-  const { amount, order_id, paymentAmount, status, secretKey } = req.body;
-  if (secretKey !== key) {
-    return res.status(401).send("Unauthorized");
-  } else {
-    console.log("Webhook received:");
-    console.log("Amount:", amount);
-    console.log("Order ID:", order_id);
-    console.log("Payment Amount:", paymentAmount);
-    console.log("Status:", status);
+  const { event_type, resource } = req.body;
+  if (event_type === "PAYMENT.CAPTURE.COMPLETED") {
+    console.log("Payment capture completed:", resource);
+  } else if (event_type === "PAYMENT.CAPTURE.DENIED") {
+    console.log("Payment capture denied:", resource);
   }
+
+  res.status(200).end();
 });
-// async function handleSuccessfulPayment(amountPaid, username) {
-//   console.log("Amount paid:", amountPaid);
-//   console.log("Product name:", username);
-//   const balance = await User.where({ username: username }).select("amount");
-//   let x = balance[0].amount;
-//   x += amountPaid;
-//   const amount = await User.where({ username: username }).select("amount");
-//   await User.updateOne({ _id: amount }, { amount: x });
-// }
 app.post("/payment", async (req, res) => {
   const amount = req.body.amount;
   const username = req.body.username;
-  const email = req.body.email;
-  const x = Math.floor(Math.random() * 10000000000);
   try {
-    const requestData = {
-      key: apikey,
-      order_id: x,
-      amount: amount,
-      purpose: username,
-      customer_email: email,
-      redirect_url: "http://localhost:3000/home",
-    };
-
-    const response = await axios.post(
-      "https://qropay.com/api/add_order.php",
-      requestData
-    );
-    const responseData = response.data;
-
-    if (responseData.status === true) {
-      console.log(responseData.status);
-      console.log(responseData.payment_url);
-      res.json({ paymentUrl: responseData.payment_url, status: "sc" });
-    } else {
-      res.status(400).send(responseData.msg);
-    }
+    const request = new paypal.orders.OrdersCreateRequest();
+    request.prefer("return=representation");
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: "USD",
+            value: amount,
+          },
+          description: "Payment for " + username,
+        },
+      ],
+    });
+    const response = await client.execute(request);
+    const paymentId = response.result.id;
+    const paymentUrl = response.result.links.find(
+      (link) => link.rel === "approve"
+    ).href;
+    res.json({ status: "sc", paymentUrl: paymentUrl });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
