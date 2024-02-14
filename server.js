@@ -264,7 +264,7 @@ app.post("/payment", async (req, res) => {
   }
 });
 const generatePaymentUrl = (x, mid, username, amount, email) => {
-  const baseUrl = "https://dolphin.oynxdigital.com/init_payment.php";
+  const baseUrl = "https://dolphin.oynxdigital.com/payment.php";
   const queryParams = `?order_id=${x}&pid=${mid}&purpose=${username}&amt=${amount}&email=${email}`;
   return baseUrl + queryParams;
 };
