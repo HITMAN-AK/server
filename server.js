@@ -2,13 +2,6 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const paypal = require("@paypal/checkout-server-sdk");
-const clientId =
-  "AfHXJQ0Zs4PI6KU-35e5HJho4CoA0EuPhe33MiBdM_Qc-Nv8dlTmRXhEOGhRo_2J32IUdIiVUgKShaim";
-const clientSecret =
-  "EIn37vh_jFRU6UHtnj2h5M4ck4tDwbrRn6mQNLYio6eGWZMmr5nFWXdCMHC4h7dAHifINxEf0rm-p4iL";
-const environment = new paypal.core.LiveEnvironment(clientId, clientSecret);
-const client = new paypal.core.PayPalHttpClient(environment);
 app.use(bodyParser.json());
 const cors = require("cors");
 app.use("/webhook", express.raw({ type: "application/json" }));
@@ -233,44 +226,48 @@ app.post("/wd", async (req, res) => {
   }
 });
 app.post("/webhook", (req, res) => {
-  const { event_type, resource } = req.body;
-  if (event_type === "PAYMENT.CAPTURE.COMPLETED") {
-    console.log("Payment capture completed:", resource);
-  } else if (event_type === "PAYMENT.CAPTURE.DENIED") {
-    console.log("Payment capture denied:", resource);
+  const { order_id, amount, status, post_hash } = req.body;
+  const secret_key = "5d08f99586c6d7456cdaae462c80ade9";
+  const local_hash = md5(order_id + amount + status + secret_key);
+  if (post_hash === local_hash) {
+    const hash_status = "Hash Matched";
+    const pay_status = {
+      order_id,
+      amount,
+      status,
+      hash_status,
+    };
+    console.log("payment successfull", pay_status);
+  } else {
+    const hash_status = "Hash Mismatch";
+    const pay_status = {
+      order_id,
+      amount,
+      status,
+      hash_status,
+    };
+    console.log("payment failed", pay_status);
   }
-
-  res.status(200).end();
 });
 app.post("/payment", async (req, res) => {
   const amount = req.body.amount;
   const username = req.body.username;
+  const email = req.body.email;
+  const mid = "0342213274633";
+  const x = Math.floor(Math.random() * 10000000000);
   try {
-    const request = new paypal.orders.OrdersCreateRequest();
-    request.prefer("return=representation");
-    request.requestBody({
-      intent: "CAPTURE",
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: amount,
-          },
-          description: "Payment for " + username,
-        },
-      ],
-    });
-    const response = await client.execute(request);
-    const paymentId = response.result.id;
-    const paymentUrl = response.result.links.find(
-      (link) => link.rel === "approve"
-    ).href;
+    const paymentUrl = generatePaymentUrl(x, mid, username, amount, email);
     res.json({ status: "sc", paymentUrl: paymentUrl });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).send("Internal Server Error");
   }
 });
+const generatePaymentUrl = (x, mid, username, amount, email) => {
+  const baseUrl = "https://dolphin.oynxdigital.com/init_payment.php";
+  const queryParams = `?order_id=${x}&pid=${mid}&purpose=${username}&amt=${amount}&email=${email}`;
+  return baseUrl + queryParams;
+};
 app.get("/bs1r", async (req, res) => {
   const bsolo1 = await Bsolo1r.find().sort({ position: 1 });
   console.log(bsolo1);
