@@ -4,6 +4,7 @@ const stripe = require("stripe")(
   "sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed"
 );
 const mongoose = require("mongoose");
+app.use(bodyParser.raw());
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 const cors = require("cors");
@@ -226,9 +227,9 @@ app.post("/wd", async (req, res) => {
     res.json({ status: "ib" });
   }
 });
-app.post("/webhook",bodyParser.raw({type: 'application/json'}), async (req, res) => {
+app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
-  const payload = req.body;
+  const payload = req.body.toString();
   let event;
   try {
     event = stripe.webhooks.constructEvent(
