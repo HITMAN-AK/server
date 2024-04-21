@@ -229,7 +229,7 @@ app.post("/wd", async (req, res) => {
 });
 app.post("/webhook", async (req, res) => {
   const sig = req.headers["stripe-signature"];
-  const payload = req.body.toString();
+  const payload = req.rawBody;
   let event;
   try {
     event = stripe.webhooks.constructEvent(
