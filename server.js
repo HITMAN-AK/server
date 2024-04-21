@@ -245,7 +245,7 @@ app.post("/webhook", async (req, res) => {
     const session = event.data.object;
     const lineItems = session.line_items;
     const productName = lineItems;
-    console.log("Checkout session completed for product:", productName);
+    console.log("Checkout session completed for product:", session);
   }
   res.status(200).end();
 });
