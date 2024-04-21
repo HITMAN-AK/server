@@ -5,7 +5,7 @@ const stripe = require("stripe")(
 );
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-app.use(express.raw());
+app.use("/webhook", bodyParser.raw({ type: 'application/json' }));
 app.use(bodyParser.json());
 const cors = require("cors");
 const User = require("./User");
