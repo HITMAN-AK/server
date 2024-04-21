@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const md5 = require('md5');
+const stripe = require('stripe')('sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed');
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
@@ -21,7 +22,6 @@ const Fsolo2r = require("./Fsolo2r");
 const Fsquadr = require("./Fsquadr");
 const Help = require("./Help");
 const Upi = require("./Upi");
-const axios = require("axios");
 app.use(express.static("public"));
 app.use(
   cors({
@@ -226,49 +226,51 @@ app.post("/wd", async (req, res) => {
     res.json({ status: "ib" });
   }
 });
-app.post("/webhook", (req, res) => {
-  const { order_id, amount, status, post_hash } = req.body;
-  const secret_key = "5d08f99586c6d7456cdaae462c80ade9";
-  const local_hash = md5(order_id + amount + status + secret_key);
-  if (post_hash === local_hash) {
-    const hash_status = "Hash Matched";
-    const pay_status = {
-      order_id,
-      amount,
-      status,
-      hash_status,
-    };
-    console.log("payment successfull", pay_status);
-  } else {
-    const hash_status = "Hash Mismatch";
-    const pay_status = {
-      order_id,
-      amount,
-      status,
-      hash_status,
-    };
-    console.log("payment failed", pay_status);
+app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, 'whsec_caerVkzQNVwI92E1f8VcrHKwNZnewgGw');
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const lineItems = session.display_items;
+    const productName = lineItems[0].description;
+    console.log('Checkout session completed for product:', productName);
   }
 });
 app.post("/payment", async (req, res) => {
   const amount = req.body.amount;
   const username = req.body.username;
-  const email = req.body.email;
-  const mid = "0342213274633";
-  const x = Math.floor(Math.random() * 10000000000);
   try {
-    const paymentUrl = generatePaymentUrl(x, mid, username, amount, email);
-    res.json({ status: "sc", paymentUrl: paymentUrl });
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'inr', // Change currency to INR
+            product_data: {
+              name: username,
+            },
+            unit_amount: amount*100, // Amount in paisa (1000 INR = 100000 paisa)
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: 'https://gaminghub.vercel.app/home',
+      cancel_url: 'https://gaminghub.vercel.app/dep',
+    });
+    res.json({ sessionId: session.id });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(500).send("Internal Server Error");
+    console.error(error);
+    res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
-const generatePaymentUrl = (x, mid, username, amount, email) => {
-  const baseUrl = "https://dolphin.oynxdigital.com/payment.php";
-  const queryParams = `?order_id=${x}&pid=${mid}&purpose=${username}&amt=${amount}&email=${email}`;
-  return baseUrl + queryParams;
-};
 app.get("/bs1r", async (req, res) => {
   const bsolo1 = await Bsolo1r.find().sort({ position: 1 });
   console.log(bsolo1);
