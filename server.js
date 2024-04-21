@@ -244,7 +244,7 @@ app.post("/webhook", async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const lineItems = session.line_items;
-    const productName = lineItems[0];
+    const productName = lineItems;
     console.log("Checkout session completed for product:", productName);
   }
   res.status(200).end();
