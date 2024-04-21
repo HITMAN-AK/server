@@ -244,7 +244,7 @@ app.post("/webhook", async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const lineItems = session.line_items;
-    const productName = lineItems;
+    const productName = lineItems[0];
     console.log("Checkout session completed for product:", productName);
   }
   res.status(200).end();
@@ -268,8 +268,8 @@ app.post("/payment", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: "http://localhost:3000/home",
-      cancel_url: "http://localhost:3000/dep",
+      success_url: "https://gaminghub.vercel.app/home",
+      cancel_url: "https://gaminghub.vercel.app/dep",
     });
     res.json({ sessionId: session.id });
   } catch (error) {
