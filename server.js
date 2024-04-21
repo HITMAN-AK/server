@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const md5 = require('md5');
 const stripe = require('stripe')('sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed');
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -236,12 +235,15 @@ app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, r
     console.error(err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const lineItems = session.display_items;
     const productName = lineItems[0].description;
     console.log('Checkout session completed for product:', productName);
   }
+
+  res.status(200).end();
 });
 app.post("/payment", async (req, res) => {
   const amount = req.body.amount;
@@ -262,8 +264,8 @@ app.post("/payment", async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'https://gaminghub.vercel.app/home',
-      cancel_url: 'https://gaminghub.vercel.app/dep',
+      success_url: 'http://localhost:3000/home',
+      cancel_url: 'http://localhost:3000/dep',
     });
     res.json({ sessionId: session.id });
   } catch (error) {
