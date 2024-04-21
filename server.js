@@ -1,6 +1,8 @@
 const express = require("express");
 const app = express();
-const stripe = require('stripe')('sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed');
+const stripe = require("stripe")(
+  "sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed"
+);
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
@@ -225,24 +227,25 @@ app.post("/wd", async (req, res) => {
     res.json({ status: "ib" });
   }
 });
-app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
+app.post("/webhook", async (req, res) => {
+  const sig = req.headers["stripe-signature"];
   let event;
-
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, 'whsec_caerVkzQNVwI92E1f8VcrHKwNZnewgGw');
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      "whsec_caerVkzQNVwI92E1f8VcrHKwNZnewgGw"
+    );
   } catch (err) {
     console.error(err);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
-
-  if (event.type === 'checkout.session.completed') {
+  if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const lineItems = session.display_items;
     const productName = lineItems[0].description;
-    console.log('Checkout session completed for product:', productName);
+    console.log("Checkout session completed for product:", productName);
   }
-
   res.status(200).end();
 });
 app.post("/payment", async (req, res) => {
@@ -250,27 +253,27 @@ app.post("/payment", async (req, res) => {
   const username = req.body.username;
   try {
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
+      payment_method_types: ["card"],
       line_items: [
         {
           price_data: {
-            currency: 'inr', // Change currency to INR
+            currency: "inr", // Change currency to INR
             product_data: {
               name: username,
             },
-            unit_amount: amount*100, // Amount in paisa (1000 INR = 100000 paisa)
+            unit_amount: amount * 100, // Amount in paisa (1000 INR = 100000 paisa)
           },
           quantity: 1,
         },
       ],
-      mode: 'payment',
-      success_url: 'http://localhost:3000/home',
-      cancel_url: 'http://localhost:3000/dep',
+      mode: "payment",
+      success_url: "http://localhost:3000/home",
+      cancel_url: "http://localhost:3000/dep",
     });
     res.json({ sessionId: session.id });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    res.status(500).json({ error: "Failed to create checkout session" });
   }
 });
 app.get("/bs1r", async (req, res) => {
