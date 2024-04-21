@@ -4,8 +4,8 @@ const stripe = require("stripe")(
   "sk_test_51OXnenSC6UDJ5EILC5oPdUo4fWF5ZHd241sGX2Y9IX8ZqvrR5d0umL8Qawlgbn1UZcmvPSOQ7Aj9lvWU5nuhnWbf001GIl31ed"
 );
 const mongoose = require("mongoose");
-app.use(bodyParser.raw());
 const bodyParser = require("body-parser");
+app.use(bodyParser.raw());
 app.use(bodyParser.json());
 const cors = require("cors");
 const User = require("./User");
