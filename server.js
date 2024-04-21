@@ -7,7 +7,6 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 const cors = require("cors");
-app.use("/webhook", express.raw({ type: "application/json" }));
 const User = require("./User");
 const Bsolo1 = require("./Bsolo1");
 const Bsolo2 = require("./Bsolo2");
@@ -227,12 +226,13 @@ app.post("/wd", async (req, res) => {
     res.json({ status: "ib" });
   }
 });
-app.post("/webhook", async (req, res) => {
+app.post("/webhook",bodyParser.raw({type: 'application/json'}), async (req, res) => {
   const sig = req.headers["stripe-signature"];
+  const payload = req.body;
   let event;
   try {
     event = stripe.webhooks.constructEvent(
-      req.body,
+      payload,
       sig,
       "whsec_caerVkzQNVwI92E1f8VcrHKwNZnewgGw"
     );
