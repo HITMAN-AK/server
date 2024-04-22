@@ -246,8 +246,10 @@ app.post("/webhook", async (req, res) => {
     const amount = session.amount_total / 100;
     const { metadata } = session;
     const username = metadata.username;
-    console.log("Payment completed for user:", username);
-    console.log("Payment successful. Amount:", amount);
+    const balance = await User.where({ username: username }).select("amount");
+    let x = balance[0].amount;
+    tot = x + amount;
+    await User.updateOne({ _id: balance }, { amount: tot });
   }
   res.status(200).end();
 });
