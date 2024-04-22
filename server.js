@@ -5,7 +5,7 @@ const stripe = require("stripe")(
 );
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-app.use("/webhook", bodyParser.raw({ type: 'application/json' }));
+app.use("/webhook", bodyParser.raw({ type: "application/json" }));
 app.use(bodyParser.json());
 const cors = require("cors");
 const User = require("./User");
@@ -243,9 +243,11 @@ app.post("/webhook", async (req, res) => {
   }
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const amount = session.amount_total / 100; 
-    const productName = session.line_items[0].price_data.product_data.name;
-    console.log("Payment successful. Amount:", amount, "Product Name:", productName);
+    const amount = session.amount_total / 100;
+    const { metadata } = session;
+    const username = metadata.username;
+    console.log("Payment completed for user:", username);
+    console.log("Payment successful. Amount:", amount);
   }
   res.status(200).end();
 });
@@ -267,6 +269,9 @@ app.post("/payment", async (req, res) => {
           quantity: 1,
         },
       ],
+      metadata: {
+        username: username, // Add username to metadata
+      },
       mode: "payment",
       success_url: "https://gaminghub.vercel.app/home",
       cancel_url: "https://gaminghub.vercel.app/deposit",
