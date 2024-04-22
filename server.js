@@ -243,17 +243,8 @@ app.post("/webhook", async (req, res) => {
   }
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const amount = session.amount_total / 100; // Convert amount from cents to currency
-    let productName = "";
-
-    if (session.display_items && session.display_items.length > 0) {
-      // If there are display items, get the name from the first one
-      productName = session.display_items[0].custom.name;
-    } else if (session.line_items && session.line_items.length > 0) {
-      // If no display items, get the name from the line items
-      productName = session.line_items[0].description;
-    }
-
+    const amount = session.amount_total / 100; 
+    const productName = session.line_items[0].price_data.product_data.name;
     console.log("Payment successful. Amount:", amount, "Product Name:", productName);
   }
   res.status(200).end();
@@ -276,10 +267,6 @@ app.post("/payment", async (req, res) => {
           quantity: 1,
         },
       ],
-      metadata: {
-        uname: username,
-        amnt : amount, 
-      },
       mode: "payment",
       success_url: "https://gaminghub.vercel.app/home",
       cancel_url: "https://gaminghub.vercel.app/deposit",
