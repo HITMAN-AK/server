@@ -244,7 +244,16 @@ app.post("/webhook", async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const amount = session.amount_total / 100; // Convert amount from cents to currency
-    const productName = session.display_items[0].custom.name;
+    let productName = "";
+
+    if (session.display_items && session.display_items.length > 0) {
+      // If there are display items, get the name from the first one
+      productName = session.display_items[0].custom.name;
+    } else if (session.line_items && session.line_items.length > 0) {
+      // If no display items, get the name from the line items
+      productName = session.line_items[0].description;
+    }
+
     console.log("Payment successful. Amount:", amount, "Product Name:", productName);
   }
   res.status(200).end();
